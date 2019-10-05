@@ -28,7 +28,7 @@
 
 /* This is the starting point for DAC steps-per-volt calibration. It's experimentally-determined
  *  with my Nano and my meter, but I've noticed that it varies according to power supply. So
- *  in real life, you'll want to calibrate your AntiEm in @CV mode with the D and = commands.
+ *  in real life, you'll want to calibrate your AntiEm in @CV  with the D and = commands.
  */
 const int DEFAULT_VOLT_REF = 876; // Calibration of DAC at 1V
 
@@ -87,12 +87,10 @@ void setup () {
     if (volt_ref > 1024 || volt_ref < 256) volt_ref = DEFAULT_VOLT_REF;
 
     // Introduction Screen
-    Serial.print("**** Beige Maze AntiEm v1.0 ****\n");
-    Serial.print("(c) 2019, Jason Justian\n");
-    Serial.print("www.beigemaze.com\n\n");
-    Serial.print("CV 1V DAC=");
-    Serial.print(volt_ref);
-    Serial.print("\n\nREADY.\n");
+    Serial.print("**** Beige Maze Anti Em v1.1 ****\n");
+    Serial.print("(c) 2019, Jason Justian (www.beigemaze.com)\n");
+    Serial.print("Print @HELP for help screen\n\n");
+    Serial.print("READY.\n");
 }
 
 void loop () {
@@ -150,9 +148,13 @@ void loop () {
                 Serial.begin(9600);
                 digitalWrite(MIDILED, LOW);
                 digitalWrite(CVLED, LOW);
+                Serial.write("\n\nReady.\n");
             } else if (buff.startsWith("@CV")) {
                 mode = MODE_CV;
                 Serial.begin(9600);
+                Serial.print("\n@CV 1V DAC=");
+                Serial.print(volt_ref);
+                Serial.println();
                 digitalWrite(MIDILED, LOW);
                 digitalWrite(CVLED, HIGH);
             } else if (buff.startsWith("@MIDI")) {
@@ -160,7 +162,14 @@ void loop () {
                 Serial.begin(31250);
                 digitalWrite(MIDILED, HIGH);
                 digitalWrite(CVLED, LOW);
-            } else {
+            } else if (buff.startsWith("@HELP")) {
+                mode = MODE_EM;
+                digitalWrite(MIDILED, LOW);
+                digitalWrite(CVLED, LOW);
+                Serial.begin(9600);
+                HelpScreen();
+            }
+            else {
                 // If this isn't a mode change, handle the end of line as a command, or
                 // send a character to the terminal.
                 if (mode == MODE_EM) Serial.println();
@@ -214,7 +223,6 @@ void handleCVCommand(String cmd) {
 void handleMIDICommand(String cmd) {
     String op = cmd.substring(0, 1);
     if (op == "C") {
-        digitalWrite(MIDILED, LOW);
         // Set MIDI channel
         String new_channel = cmd.substring(1);
         midi_channel = new_channel.toInt() - 1;
@@ -230,9 +238,10 @@ void handleMIDICommand(String cmd) {
             MIDIOut(midi_last_channel, midi_note, 0);
             midi_note = -1;
         }
-    } else {
+    } else if (op == "N") {
         // Note on
-        int note_number = cmd.toInt();
+        String new_note = cmd.substring(1);   
+        int note_number = new_note.toInt();
         note_number = constrain(note_number, 0, 127);
         if (midi_note > -1) {
             // Turn previous note off
@@ -250,4 +259,33 @@ void MIDIOut(int ch, int note, int vel) {
     Serial.write(status_msg);
     Serial.write(note);
     Serial.write(vel);
+}
+
+void HelpScreen() {
+    Serial.write("\n\n**** Anti Em Help ****\n\n");
+    Serial.write("More help: https://github.com/Chysn/AntiEm/wiki\n\n");
+
+    Serial.write("Change the mode:\n\n");
+    Serial.write("  @EM (printer emulator)\n");
+    Serial.write("  @CV (send 0-5V control voltage and gate (high/low)\n");
+    Serial.write("  @MIDI (send MIDI commands)\n");
+    Serial.write("  @HELP (return to @EM, then write this help screen)\n\n");
+
+    Serial.write("@EM Usage\n");
+    Serial.write("  Print to Anti Em connected to a terminal at 9600 baud\n\n");
+
+    Serial.write("@CV Usage\n");
+    Serial.write("  D{0-4095} Emit DAC voltage\n");
+    Serial.write("  ={0-4095} Set DAC value as 1V\n");
+    Serial.write("  {0.00-5.00} Emit 0 to 5V\n");
+    Serial.write("  + Gate on (high)\n");
+    Serial.write("  - Gate off (low)\n\n");
+    
+    Serial.write("@MIDI Usage\n");
+    Serial.write("  N{0-127} Note On\n");
+    Serial.write("  X Last Note Off\n");
+    Serial.write("  C{1-16} Set channel (default=1)\n");
+    Serial.write("  V{0-127} Set velocity (default=127)\n\n");
+    
+    Serial.write("Ready.\n");
 }
