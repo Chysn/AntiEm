@@ -56,6 +56,9 @@ int mode; // Selected mode (see above for available modes)
 String buff; // Command buffer
 
 int volt_ref; // Default calibration
+unsigned long gate_release; // Set with CV Sync command; turn off gate at 0
+int gate_length; // Length of gate countdown in ms
+
 int midi_channel;
 int midi_note;
 int midi_velocity;
@@ -85,6 +88,8 @@ void setup () {
     int lsb = EEPROM.read(1);
     volt_ref = (msb * 256) + lsb;
     if (volt_ref > 1024 || volt_ref < 256) volt_ref = DEFAULT_VOLT_REF;
+    gate_release = 0;
+    gate_length = 10;
 
     // Introduction Screen
     Serial.print("**** Beige Maze Anti Em v1.1 ****\n");
@@ -96,6 +101,12 @@ void setup () {
 void loop () {
     digitalWrite(InfoLED, LOW);
     Xout = digitalRead(IN_Xout);
+
+    if (gate_release && millis() >= gate_release) {
+        // Handle gate release
+        digitalWrite(CV_Gate, LOW);
+        gate_release = 0;
+    }
 
     if (Xout) {
         // DeviceSelect:
@@ -211,12 +222,24 @@ void handleCVCommand(String cmd) {
         int val = new_dacv.toInt();
         val = constrain(val, 0, 4095);
         dac.setVoltage(val, false);
+    } else if (op == "L") {
+        // Set gate length in ms
+        String new_length = cmd.substring(1);
+        gate_length = new_length.toInt();
+        gate_length = constrain(gate_length, 0, 9999);
+        if (gate_length < 0) gate_length = 0;
+        if (gate_release) gate_release = millis() + gate_length;
+    } else if (op == "S") {
+        // Sync voltage out with gate signal
+        String new_v = cmd.substring(1);
+        float v = new_v.toFloat();
+        CVOut(v);
+        digitalWrite(CV_Gate, HIGH);
+        gate_release = millis() + gate_length;
     } else {
         // Voltage out
         float v = cmd.toFloat();
-        int val = v * volt_ref;
-        val = constrain(val, 0, 4095);
-        dac.setVoltage(val, false);
+        CVOut(v);
     }
 }
 
@@ -253,6 +276,12 @@ void handleMIDICommand(String cmd) {
     }
 }
 
+void CVOut(int v) {
+    int val = v * volt_ref;
+    val = constrain(val, 0, 4095);
+    dac.setVoltage(val, false);
+}
+
 void MIDIOut(int ch, int note, int vel) {
     char status_msg = vel ? 0x90 : 0x80; /* Velocity = 0 sends Note Off */
     status_msg += ch; /* Add low nybble channel number */
@@ -279,7 +308,9 @@ void HelpScreen() {
     Serial.write("  ={0-4095} Set DAC value as 1V\n");
     Serial.write("  {0.00-5.00} Emit 0 to 5V\n");
     Serial.write("  + Gate on (high)\n");
-    Serial.write("  - Gate off (low)\n\n");
+    Serial.write("  - Gate off (low)\n");
+    Serial.write("  L{0-9999} Set gate length in ms (default=10ms)\n");
+    Serial.write("  S{0.00-5.00} Emit 0 to 5V and gate for set length\n\n");
     
     Serial.write("@MIDI Usage\n");
     Serial.write("  N{0-127} Note On\n");

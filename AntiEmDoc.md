@@ -43,6 +43,14 @@ Gate on. The gate output goes high, to the Arduino's max output
 ### -
 
 Gate off. The gate output goes low, to 0V
+
+### L{0-9999}
+
+Set gate length in ms for the *S* command. Defaults to 10ms on power-up
+
+### S{0.00-5.00V}
+
+Emits the specified voltage _and_ sets the gate high for the length specifed by the **L** command
     
 ## @MIDI Usage
 
@@ -56,7 +64,7 @@ Note Off. Sends a note off message for the last note on, on the last channel
 
 ### C{1-16}
 
-Set MIDI channel for subsequent note on messages. Defaults to 1 on power-up.
+Set MIDI channel for subsequent note on messages. Defaults to 1 on power-up
 
 ### V{0-127}
 
