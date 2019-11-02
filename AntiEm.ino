@@ -92,10 +92,10 @@ void setup () {
     gate_length = 10;
 
     // Introduction Screen
-    Serial.print("**** Beige Maze Anti Em v1.1 ****\n");
-    Serial.print("(c) 2019, Jason Justian (www.beigemaze.com)\n");
-    Serial.print("Print @HELP for help screen\n\n");
-    Serial.print("READY.\n");
+    Serial.print("**** Beige Maze Anti Em v1.1 ****\n\r");
+    Serial.print("(c) 2019, Jason Justian (www.beigemaze.com)\n\r");
+    Serial.print("Print @HELP for help screen\n\r\n\r");
+    Serial.print("READY.\n\r");
 }
 
 void loop () {
@@ -159,11 +159,11 @@ void loop () {
                 Serial.begin(9600);
                 digitalWrite(MIDILED, LOW);
                 digitalWrite(CVLED, LOW);
-                Serial.write("\n\nReady.\n");
+                Serial.write("\n\r\n\rReady.\n\r");
             } else if (buff.startsWith("@CV")) {
                 mode = MODE_CV;
                 Serial.begin(9600);
-                Serial.print("\n@CV 1V DAC=");
+                Serial.print("\n\r@CV 1V DAC=");
                 Serial.print(volt_ref);
                 Serial.println();
                 digitalWrite(MIDILED, LOW);
@@ -291,32 +291,32 @@ void MIDIOut(int ch, int note, int vel) {
 }
 
 void HelpScreen() {
-    Serial.write("\n\n**** Anti Em Help ****\n\n");
-    Serial.write("More help: https://github.com/Chysn/AntiEm/wiki\n\n");
+    Serial.write("\n\r\n\r**** Anti Em Help ****\n\r\n\r");
+    Serial.write("More help: https://github.com/Chysn/AntiEm/wiki\n\r\n\r");
 
-    Serial.write("Change the mode:\n\n");
-    Serial.write("  @EM (printer emulator)\n");
-    Serial.write("  @CV (send 0-5V control voltage and gate (high/low)\n");
-    Serial.write("  @MIDI (send MIDI commands)\n");
-    Serial.write("  @HELP (return to @EM, then write this help screen)\n\n");
+    Serial.write("Change the mode:\n\r\n\r");
+    Serial.write("  @EM (printer emulator)\n\r");
+    Serial.write("  @CV (send 0-5V control voltage and gate (high/low)\n\r");
+    Serial.write("  @MIDI (send MIDI commands)\n\r");
+    Serial.write("  @HELP (return to @EM, then write this help screen)\n\r\n\r");
 
-    Serial.write("@EM Usage\n");
-    Serial.write("  Print to Anti Em connected to a terminal at 9600 baud\n\n");
+    Serial.write("@EM Usage\n\r");
+    Serial.write("  Print to Anti Em connected to a terminal at 9600 baud\n\r\n\r");
 
-    Serial.write("@CV Usage\n");
-    Serial.write("  D{0-4095} Emit DAC voltage\n");
-    Serial.write("  ={0-4095} Set DAC value as 1V\n");
-    Serial.write("  {0.00-5.00} Emit 0 to 5V\n");
-    Serial.write("  + Gate on (high)\n");
-    Serial.write("  - Gate off (low)\n");
-    Serial.write("  L{0-9999} Set gate length in ms (default=10ms)\n");
-    Serial.write("  S{0.00-5.00} Emit 0 to 5V and gate for set length\n\n");
+    Serial.write("@CV Usage\n\r");
+    Serial.write("  D{0-4095} Emit DAC voltage\n\r");
+    Serial.write("  ={0-4095} Set DAC value as 1V\n\r");
+    Serial.write("  {0.00-5.00} Emit 0 to 5V\n\r");
+    Serial.write("  + Gate on (high)\n\r");
+    Serial.write("  - Gate off (low)\n\r");
+    Serial.write("  L{0-9999} Set gate length in ms (default=10ms)\n\r");
+    Serial.write("  S{0.00-5.00} Emit 0 to 5V and gate for set length\n\r\n\r");
     
-    Serial.write("@MIDI Usage\n");
-    Serial.write("  N{0-127} Note On\n");
-    Serial.write("  X Last Note Off\n");
-    Serial.write("  C{1-16} Set channel (default=1)\n");
-    Serial.write("  V{0-127} Set velocity (default=127)\n\n");
+    Serial.write("@MIDI Usage\n\r");
+    Serial.write("  N{0-127} Note On\n\r");
+    Serial.write("  X Last Note Off\n\r");
+    Serial.write("  C{1-16} Set channel (default=1)\n\r");
+    Serial.write("  V{0-127} Set velocity (default=127)\n\r\n\r");
     
-    Serial.write("Ready.\n");
+    Serial.write("Ready.\n\r");
 }
