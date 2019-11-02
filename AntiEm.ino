@@ -276,7 +276,7 @@ void handleMIDICommand(String cmd) {
     }
 }
 
-void CVOut(int v) {
+void CVOut(float v) {
     int val = v * volt_ref;
     val = constrain(val, 0, 4095);
     dac.setVoltage(val, false);
